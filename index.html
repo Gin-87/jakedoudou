@@ -2,167 +2,121 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>给我当老婆好不好</title>
+  <title>你愿意做我的老婆吗？</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
-    * {
-      box-sizing: border-box;
+    body {
       margin: 0;
       padding: 0;
-    }
-
-    body {
       height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
       background: #ffe6f2;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-family: "Microsoft Yahei", sans-serif;
+      overflow: hidden;
     }
 
     .container {
       text-align: center;
-      padding: 24px;
+      padding: 20px;
     }
 
     #question {
       font-size: 32px;
-      font-weight: 700;
-      margin-bottom: 32px;
-      transition: font-size 0.15s ease;
+      font-weight: bold;
       color: #ff4b7d;
+      transition: font-size 0.2s ease;
     }
 
     .buttons {
+      margin-top: 30px;
       display: flex;
       justify-content: center;
-      gap: 16px;
+      gap: 20px;
     }
 
     button {
-      border: none;
-      padding: 10px 24px;
-      font-size: 18px;
+      padding: 12px 28px;
+      font-size: 20px;
       border-radius: 999px;
+      border: none;
       cursor: pointer;
-      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.2s ease;
+      transition: all 0.2s ease;
     }
 
     #yesBtn {
       background: #ff4b7d;
-      color: #fff;
-      box-shadow: 0 4px 10px rgba(255, 75, 125, 0.4);
-    }
-
-    #yesBtn:hover {
-      transform: translateY(-1px) scale(1.03);
-      box-shadow: 0 6px 16px rgba(255, 75, 125, 0.5);
+      color: white;
     }
 
     #noBtn {
-      background: #fff;
+      background: white;
       color: #ff4b7d;
       border: 2px solid #ff4b7d;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-    }
-
-    #noBtn:hover {
-      transform: translateY(-1px) scale(1.03);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-    }
-
-    /* 小抖动效果，用在“不愿意”被点的时候 */
-    .shake {
-      animation: shake 0.2s linear 0s 2;
-    }
-
-    @keyframes shake {
-      0% { transform: translateX(0); }
-      25% { transform: translateX(-4px); }
-      50% { transform: translateX(4px); }
-      75% { transform: translateX(-4px); }
-      100% { transform: translateX(0); }
+      position: relative;
     }
   </style>
 </head>
+
 <body>
-<div class="container">
-  <div id="question">你愿意做我的老婆吗？🥹💕</div>
-  <div class="buttons">
-    <button id="yesBtn">愿意 ❤️</button>
-    <button id="noBtn">不愿意 🙅‍♂️</button>
+  <div class="container">
+    <div id="question">你愿意做我的老婆吗？🥹💕</div>
+
+    <div class="buttons">
+      <button id="yesBtn">愿意 ❤️</button>
+      <button id="noBtn">不愿意 🙅‍♂️</button>
+    </div>
   </div>
-</div>
 
-<script>
-  const question = document.getElementById("question");
-  const yesBtn = document.getElementById("yesBtn");
-  const noBtn = document.getElementById("noBtn");
+  <script>
+    const question = document.getElementById("question");
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
 
-  let growInterval = null;
-  let currentSize = 32;        // 初始字体大小
-  let maxSize = 160;           // 最大放大到多少，可以自己改
-  let growing = false;
+    let size = 32;
+    let growing = false;
 
-  function startGrowing() {
-    if (growing) return;
-    growing = true;
+    // 不愿意：每点击一次文字变大，不愿意按钮变小/逃跑
+    noBtn.addEventListener("click", () => {
+      // 字体爆炸
+      if (!growing) {
+        growing = true;
+        const growInterval = setInterval(() => {
+          size += 6;
+          question.style.fontSize = size + "px";
 
-    growInterval = setInterval(() => {
-      // 每次放大一点点
-      currentSize += 4;
-      if (currentSize > maxSize) {
-        currentSize = maxSize;
+          if (size > 120) {
+            clearInterval(growInterval);
+          }
+        }, 150);
       }
-      question.style.fontSize = currentSize + "px";
 
-      // 字变超大后，“不愿意”按钮可以顺便变小一点更搞笑
-      if (currentSize >= 80) {
-        noBtn.style.transform = "scale(0.8)";
-      }
-      if (currentSize >= maxSize) {
-        // 到最大就不要再长了，但保持“困住”的感觉
-        clearInterval(growInterval);
-        growInterval = null;
-      }
-    }, 150);
-  }
+      // 按钮缩小
+      let currentScale = parseFloat(noBtn.style.transform.replace("scale(", "").replace(")", "")) || 1;
+      currentScale = Math.max(0.5, currentScale - 0.1);
+      noBtn.style.transform = `scale(${currentScale})`;
 
-  noBtn.addEventListener("click", () => {
-    // 禁止他轻易“关掉”网页
-    window.onbeforeunload = function () {
-      return "还没答应就想跑？";
-    };
+      // 按钮逃跑（随机移动）
+      const randomX = (Math.random() - 0.5) * 200;
+      const randomY = (Math.random() - 0.5) * 200;
 
-    // 抖一下
-    question.classList.remove("shake");
-    void question.offsetWidth; // 重新触发动画的小技巧
-    question.classList.add("shake");
+      noBtn.style.position = "relative";
+      noBtn.style.left = randomX + "px";
+      noBtn.style.top = randomY + "px";
+    });
 
-    startGrowing();
-  });
+    // 愿意：显示甜蜜提示
+    yesBtn.addEventListener("click", () => {
+      alert("还是妥协了 爱你宝宝❤️");
 
-  yesBtn.addEventListener("click", () => {
-    // 停止放大
-    if (growInterval) {
-      clearInterval(growInterval);
-      growInterval = null;
-    }
-    growing = false;
+      question.textContent = "老婆晚上好";
+      question.style.fontSize = "40px";
 
-    // 允许离开网页
-    window.onbeforeunload = null;
-
-    // 给一个甜甜的提示
-    alert("还是妥协了 爱你宝宝 ❤️");
-
-    // 也可以改成显示新文字
-    question.textContent = "好耶！那从现在开始你就是我老婆啦！🥰";
-    question.style.fontSize = "40px";
-
-    // 点完“愿意”之后，把“不愿意”给禁用掉
-    noBtn.disabled = true;
-    noBtn.textContent = "已经晚啦～";
-  });
-</script>
+      noBtn.disabled = true;
+      noBtn.textContent = "已经晚啦～";
+    });
+  </script>
 </body>
 </html>
